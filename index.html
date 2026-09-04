@@ -213,6 +213,8 @@
     background:var(--bg-alt);border:1px dashed var(--card-border);border-radius:10px;
     padding:16px;display:flex;flex-direction:column;gap:10px;
   }
+  .bank-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:600px){.bank-grid{grid-template-columns:1fr;}}
   .addr-row{display:flex;gap:8px;align-items:center;}
   .addr-value{
     flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;
@@ -223,10 +225,10 @@
     padding:10px 14px;border-radius:8px;font-size:13px;cursor:pointer;white-space:nowrap;
   }
   .copy-btn:hover{border-color:var(--gold-dim);}
-  .qr-placeholder{
-    width:150px;height:150px;margin:6px auto 0;border:1px dashed var(--card-border);border-radius:10px;
-    display:flex;align-items:center;justify-content:center;text-align:center;font-size:12px;color:var(--text-dim);
-    padding:10px;background:repeating-linear-gradient(45deg, var(--bg) 0 8px, var(--bg-alt) 8px 16px);
+  .qr-code-box{
+    width:166px;height:166px;margin:0 auto 4px;border-radius:10px;
+    background:#ffffff;display:flex;align-items:center;justify-content:center;
+    padding:8px;
   }
   .net-warning{
     background:rgba(255,92,92,0.08);border:1px solid rgba(255,92,92,0.35);color:#ff9a9a;
@@ -274,8 +276,8 @@
   待办 / TODO —— 上线前请替换以下内容:
   1. 品牌名称:已设置为"云链算力 CloudHash"(如需更换 Logo 图片,请自行替换)
   2. 各链算力套餐的具体算力、价格、周期(当前为示例数据)
-  3. USDT 收款地址(TRC20 / ERC20),搜索 "PLACEHOLDER_USDT" 定位
-  4. 收款二维码图片(当前为占位框,建议替换为真实收款二维码图片)
+  3. USDT 收款地址:已设置为真实地址(TRC20 / ERC20)
+  4. 收款二维码图片:已替换为真实二维码图片(TRC20/ERC20);个人卡/对公账户(四个:人民币/美元/港币/离岸人民币)左右并排展示,均已填入真实户名与账号;已在个人卡下方预留"财务收款"占位区,搜索 "财务收款" 定位填入正式信息
   5. 客服联系方式:已设置为 Telegram t.me/cloudhashorg(如需更换,搜索 "cloudhashorg" 定位)
   6. 页面底部风险提示与合规声明,请结合实际经营地法律法规核实后使用
   =====================================================================
@@ -459,9 +461,9 @@
 <section id="buy">
   <div class="container">
     <div class="section-head">
-      <div class="eyebrow">Pay with USDT</div>
-      <h2>USDT 购买算力</h2>
-      <p>请仔细核对网络类型与收款地址后再转账,USDT 转账一旦发出无法撤销。</p>
+      <div class="eyebrow">Payment</div>
+      <h2>USDT / 银行卡购买算力</h2>
+      <p>支持 USDT（TRC20 / ERC20）与银行卡两种付款方式，请仔细核对收款信息后再付款，USDT 转账一旦发出无法撤销。</p>
     </div>
 
     <div class="buy-shell">
@@ -483,7 +485,7 @@
           </div>
 
           <div class="form-row">
-            <label>USDT 网络</label>
+            <label>USDT 网络（银行卡付款可忽略此项）</label>
             <div class="radio-group">
               <div class="radio-pill active" data-net="TRC20">TRC20（推荐 · 手续费低）</div>
               <div class="radio-pill" data-net="ERC20">ERC20</div>
@@ -499,8 +501,8 @@
 
           <h3 style="margin-top:26px;">② 转账凭证（用于人工核实）</h3>
           <div class="form-row">
-            <label>转账哈希 / TxID（可稍后补充）</label>
-            <input type="text" id="txHash" placeholder="例如：0xabc123... 或 交易哈希">
+            <label>转账哈希 / TxID（银行卡付款可填转账流水号，可稍后补充）</label>
+            <input type="text" id="txHash" placeholder="例如：0xabc123... 或 交易哈希 / 银行流水号">
           </div>
           <div class="form-row">
             <label>联系方式（邮箱 / Telegram，用于通知开通结果）</label>
@@ -512,27 +514,25 @@
           <div class="order-confirm" id="orderConfirm"></div>
         </div>
 
-        <!-- Right: payment address -->
+        <!-- Right: USDT payment -->
         <div class="buy-col">
-          <h3>③ 向以下地址转账</h3>
+          <h3>③ USDT 收款</h3>
 
           <div class="net-warning" style="margin-bottom:16px;">
             请务必核对当前选择的网络（TRC20 / ERC20），转错网络可能导致资产无法找回。
           </div>
 
           <div class="addr-box">
-            <div class="qr-placeholder">
-              收款二维码占位区<br>请替换为真实收款二维码图片
-            </div>
+            <div class="qr-code-box"><img id="qrcodeImg" src="img/qr-trc20.png" alt="USDT TRC20 收款二维码" style="width:100%;height:100%;object-fit:contain;display:block;"></div>
             <label style="font-size:12.5px;color:var(--text-dim);">USDT 收款地址（<span id="netLabel">TRC20</span>）</label>
             <div class="addr-row">
-              <div class="addr-value" id="usdtAddress">PLACEHOLDER_USDT_TRC20_ADDRESS_请替换为真实收款地址</div>
+              <div class="addr-value" id="usdtAddress">TDCTRfQ8MWarArBMDgLzoh8mSkLjBMhoVC</div>
               <button class="copy-btn" id="copyAddrBtn">复制</button>
             </div>
           </div>
 
           <div class="summary-box" style="margin-top:20px;">
-            <div class="row"><span>应付金额</span><b id="sumPrice2">329 USDT</b></div>
+            <div class="row total"><span>应付金额</span><b id="sumPrice2">329 USDT</b></div>
             <div class="row"><span>订单号</span><b id="orderIdShow">下单后生成</b></div>
           </div>
 
@@ -542,6 +542,88 @@
             如有疑问请联系客服：<a href="https://t.me/cloudhashorg" target="_blank" rel="noopener" style="color:var(--teal);font-weight:600;">Telegram @cloudhashorg</a>
           </p>
         </div>
+      </div>
+    </div>
+
+    <!-- Bank card payment — separate, standalone item -->
+    <div class="buy-shell" style="margin-top:24px;">
+      <div class="buy-col">
+        <h3>④ 银行卡收款（人民币）</h3>
+
+        <div class="net-warning" style="margin-bottom:16px;">
+          请核对收款户名与卡号，转账时请务必备注订单号或联系方式，以便核实到账。
+        </div>
+
+        <div class="bank-grid">
+          <div class="addr-box">
+            <label style="font-size:12.5px;color:var(--text-dim);">法人收款</label>
+            <div class="mini-row"><span>户名</span><b>关喜彬</b></div>
+            <div class="addr-row">
+              <div class="addr-value" id="bankCardNo" data-raw="6217000780080472278">6217 0007 8008 0472 278</div>
+              <button class="copy-btn" id="copyCardBtn">复制</button>
+            </div>
+          </div>
+
+          <div class="addr-box">
+            <label style="font-size:12.5px;color:var(--text-dim);">财务收款(账户一)</label>
+            <div class="mini-row"><span>户名</span><b>金龙龙</b></div>
+            <div class="addr-row">
+              <div class="addr-value" id="corpAccountNo" data-raw="6210 2862 1097 4711">6210 2862 1097 4711</div>
+              <button class="copy-btn" id="copyCorpBtn">复制</button>
+            </div>
+          </div>
+
+          <div class="addr-box">
+            <label style="font-size:12.5px;color:var(--text-dim);">财务收款(账户二)</label>
+            <div class="mini-row"><span>户名</span><b>俞旭飞</b></div>
+            <div class="addr-row">
+              <div class="addr-value" id="corpAccountNo" data-raw="6230 9107 9909 3015 538">6230 9107 9909 3015 538</div>
+              <button class="copy-btn" id="copyCorpBtn">复制</button>
+            </div>
+          </div>
+
+          <div class="addr-box">
+            <label style="font-size:12.5px;color:var(--text-dim);">财务收款(账户三)</label>
+            <div class="mini-row"><span>户名</span><b>杜海军</b></div>
+            <div class="addr-row">
+              <div class="addr-value" id="corpAccountNo2" data-raw=" 6226 2207 1172 3386"> 6226 2207 1172 3386</div>
+              <button class="copy-btn" id="copyCorpBtn2">复制</button>
+            </div>
+          </div>
+
+          <div class="addr-box">
+            <label style="font-size:12.5px;color:var(--text-dim);">财务收款(账户四)</label>
+            <div class="mini-row"><span>户名</span><b>陈超</b></div>
+            <div class="addr-row">
+              <div class="addr-value" id="corpAccountNo3" data-raw=" 6226 2207 1173 9820"> 6226 2207 1173 9820</div>
+              <button class="copy-btn" id="copyCorpBtn3">复制</button>
+            </div>
+          </div>
+
+          <div class="addr-box">
+            <label style="font-size:12.5px;color:var(--text-dim);">财务收款(账户五)</label>
+            <div class="mini-row"><span>户名</span><b>潘一飞</b></div>
+            <div class="addr-row">
+              <div class="addr-value" id="corpAccountNo4" data-raw=" 6222 6233 7000 3433 487"> 6222 6233 7000 3433 487</div>
+              <button class="copy-btn" id="copyCorpBtn4">复制</button>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size:12px;color:var(--text-dim);margin:12px 0 0;">
+          使用银行卡 / 对公账户付款前，请先通过 Telegram 客服确认应付人民币金额与实时汇率，转账时请备注订单号或联系方式，以便核实到账。
+        </p>
+
+        <div class="summary-box" style="margin-top:20px;">
+          <div class="row total"><span>应付金额</span><b id="sumPrice3">329 USDT</b></div>
+          <div class="row"><span>订单号</span><b id="orderIdShow2">下单后生成</b></div>
+        </div>
+
+        <p style="font-size:12.5px;color:var(--text-dim);margin-top:16px;">
+          转账完成后，请在上方填写转账流水号与联系方式并提交订单，或直接联系客服确认到账。人工核实到账后，我们将在
+          <b style="color:var(--text);">24 小时内</b>为您开通算力。
+          如有疑问请联系客服：<a href="https://t.me/cloudhashorg" target="_blank" rel="noopener" style="color:var(--teal);font-weight:600;">Telegram @cloudhashorg</a>
+        </p>
       </div>
     </div>
   </div>
@@ -629,8 +711,8 @@
   // ---- Network pills ----
   var netPills = document.querySelectorAll('.radio-pill');
   var addresses = {
-    TRC20: 'PLACEHOLDER_USDT_TRC20_ADDRESS_请替换为真实收款地址',
-    ERC20: 'PLACEHOLDER_USDT_ERC20_ADDRESS_请替换为真实收款地址'
+    TRC20: 'TDCTRfQ8MWarArBMDgLzoh8mSkLjBMhoVC',
+    ERC20: '0xc81b575ef86A3efcd78a4ebbEb5b8f9253d55AbF'
   };
   netPills.forEach(function(p){
     p.addEventListener('click', function(){
@@ -645,6 +727,8 @@
     return active ? active.dataset.net : 'TRC20';
   }
 
+  var qrImages = { TRC20: 'img/qr-trc20.png', ERC20: 'img/qr-erc20.png' };
+
   function updateSummary(){
     var select = document.getElementById('pkgSelect');
     var parts = select.value.split('|'); // name|price|hash|days
@@ -656,8 +740,15 @@
     document.getElementById('sumNet').textContent = net;
     document.getElementById('sumPrice').textContent = price + ' USDT';
     document.getElementById('sumPrice2').textContent = price + ' USDT';
+    document.getElementById('sumPrice3').textContent = price + ' USDT';
     document.getElementById('netLabel').textContent = net;
     document.getElementById('usdtAddress').textContent = addresses[net];
+
+    var qrImg = document.getElementById('qrcodeImg');
+    if (qrImg){
+      qrImg.src = qrImages[net];
+      qrImg.alt = 'USDT ' + net + ' 收款二维码';
+    }
   }
   document.getElementById('pkgSelect').addEventListener('change', updateSummary);
   updateSummary();
@@ -666,6 +757,31 @@
   document.getElementById('copyAddrBtn').addEventListener('click', function(){
     var text = document.getElementById('usdtAddress').textContent;
     navigator.clipboard && navigator.clipboard.writeText(text).then(showToast);
+  });
+  document.getElementById('copyCardBtn').addEventListener('click', function(){
+    var el = document.getElementById('bankCardNo');
+    var text = el.dataset.raw || el.textContent;
+    navigator.clipboard && navigator.clipboard.writeText(text).then(function(){ showToast('卡号已复制'); });
+  });
+  document.getElementById('copyCorpBtn').addEventListener('click', function(){
+    var el = document.getElementById('corpAccountNo');
+    var text = el.dataset.raw || el.textContent;
+    navigator.clipboard && navigator.clipboard.writeText(text).then(function(){ showToast('账号已复制'); });
+  });
+  document.getElementById('copyCorpBtn2').addEventListener('click', function(){
+    var el = document.getElementById('corpAccountNo2');
+    var text = el.dataset.raw || el.textContent;
+    navigator.clipboard && navigator.clipboard.writeText(text).then(function(){ showToast('账号已复制'); });
+  });
+  document.getElementById('copyCorpBtn3').addEventListener('click', function(){
+    var el = document.getElementById('corpAccountNo3');
+    var text = el.dataset.raw || el.textContent;
+    navigator.clipboard && navigator.clipboard.writeText(text).then(function(){ showToast('账号已复制'); });
+  });
+  document.getElementById('copyCorpBtn4').addEventListener('click', function(){
+    var el = document.getElementById('corpAccountNo4');
+    var text = el.dataset.raw || el.textContent;
+    navigator.clipboard && navigator.clipboard.writeText(text).then(function(){ showToast('账号已复制'); });
   });
   function showToast(msg){
     var t = document.getElementById('toast');
@@ -689,6 +805,8 @@
     var orderId = 'CH' + Date.now().toString().slice(-8) + Math.floor(Math.random()*90+10);
 
     document.getElementById('orderIdShow').textContent = orderId;
+    var orderIdShow2 = document.getElementById('orderIdShow2');
+    if (orderIdShow2) orderIdShow2.textContent = orderId;
 
     var box = document.getElementById('orderConfirm');
     box.style.display = 'block';
